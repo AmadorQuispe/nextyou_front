@@ -7,7 +7,7 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 
-export const Route = createFileRoute("/(auth)/login")({
+export const Route = createFileRoute("/(auth)/login/page")({
   component: LoginPage,
 });
 

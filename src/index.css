@@ -1,1 +1,33 @@
 @import "tailwindcss";
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@theme {
+  --color-primary1: oklch(0.561 0.201 292.17); /* #6B46C1 */
+  --color-primary2: oklch(0.537 0.166 266.17); /* #3182CE */
+  --color-background-light: oklch(0.967 0.007 248.59); /* #F7FAFC */
+  --color-background-dark: oklch(0.203 0.031 261.62); /* #1A202C */
+  --color-text-primary: oklch(0.293 0.054 276.19); /* #2D3748 */
+  --color-text-secondary: oklch(0.368 0.042 276.41); /* #4A5568 */
+  --color-emotional-accent: oklch(0.776 0.208 204.92); /* #0BC5EA */
+  --color-border-light: oklch(0.693 0.044 268.74); /* #A0AEC0 */
+
+  --animate-fade-in-scale: fade-in-scale 0.3s ease-out;
+  @keyframes fade-in-scale: {
+     {
+      0%: {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100%: {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+}

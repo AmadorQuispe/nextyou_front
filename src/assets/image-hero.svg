@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+  <!-- Definición de colores de la paleta proporcionada -->
+  <defs>
+    <linearGradient id="fondo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6B46C1" /> <!-- color-primary1 -->
+      <stop offset="100%" stop-color="#3182CE" /> <!-- color-primary2 -->
+    </linearGradient>
+    
+    <!-- Filtro para el resplandor de la silueta futura -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Sin fondo -->
+  
+  <!-- Línea de tiempo conectora entre siluetas -->
+  <path d="M230,250 C330,230 470,270 570,250" 
+        stroke="#A0AEC0" stroke-width="2" fill="none" stroke-dasharray="8,4" /> <!-- color-border-light -->
+  
+  <!-- Silueta de persona actual -->
+  <g transform="translate(230, 250)">
+    <!-- Cuerpo -->
+    <path d="M0,0 Q-25,-70 0,-120 Q25,-70 0,0 Z" fill="#6B46C1" /> <!-- color-primary1 -->
+    <!-- Cabeza -->
+    <circle cx="0" cy="-140" r="30" fill="#6B46C1" /> <!-- color-primary1 -->
+    <!-- Etiqueta de "Presente" -->
+    <text x="0" y="30" font-family="Arial, sans-serif" font-size="16" fill="#2D3748" text-anchor="middle">Presente</text> <!-- color-text-primary -->
+  </g>
+  
+  <!-- Silueta de persona futura con brillo -->
+  <g transform="translate(570, 250)" filter="url(#glow)">
+    <!-- Cuerpo -->
+    <path d="M0,0 Q-25,-70 0,-120 Q25,-70 0,0 Z" fill="#0BC5EA" /> <!-- color-emotional-accent -->
+    <!-- Cabeza -->
+    <circle cx="0" cy="-140" r="30" fill="#0BC5EA" /> <!-- color-emotional-accent -->
+    <!-- Etiqueta de "Futuro" -->
+    <text x="0" y="30" font-family="Arial, sans-serif" font-size="16" fill="#2D3748" text-anchor="middle">Futuro</text> <!-- color-text-primary -->
+  </g>
+  
+  <!-- Partículas de conexión entre las siluetas -->
+  <g fill="#3182CE" fill-opacity="0.7"> <!-- color-primary2 con opacidad -->
+    <circle cx="270" cy="230" r="4" />
+    <circle cx="310" cy="245" r="3" />
+    <circle cx="350" cy="235" r="5" />
+    <circle cx="390" cy="255" r="3" />
+    <circle cx="430" cy="240" r="4" />
+    <circle cx="470" cy="230" r="3" />
+    <circle cx="510" cy="250" r="5" />
+    <circle cx="530" cy="235" r="4" />
+  </g>
+  
+</svg>
