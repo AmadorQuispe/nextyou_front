@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import SilhouetteSVG from "../assets/image-hero.svg";
 
 export const Route = createFileRoute("/")({
@@ -31,9 +31,11 @@ function HomePage() {
           NextYou es tu espacio para escribir, reflexionar y recibir consejos
           desde tu propio futuro. Tu crecimiento comienza hoy.
         </p>
-        <button className='bg-primary2 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-lg font-medium shadow-xl transition duration-300'>
+        <Link
+          to='/login'
+          className='bg-primary2 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-lg font-medium shadow-xl transition duration-300'>
           Conectar con mi Yo del Futuro
-        </button>
+        </Link>
       </section>
 
       {/* Footer */}

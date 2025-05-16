@@ -8,18 +8,27 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as DashboardrootImport } from './routes/dashboard/__root'
 import { Route as IndexImport } from './routes/index'
-import { Route as ChatPageImport } from './routes/chat/page'
-import { Route as authLoginPageImport } from './routes/(auth)/login/page'
+import { Route as protectedDashboardImport } from './routes/(protected)/_dashboard'
+import { Route as authLoginIndexImport } from './routes/(auth)/login/index'
+import { Route as protectedDashboardQuestionnaireIndexImport } from './routes/(protected)/_dashboard/questionnaire/index'
+import { Route as protectedDashboardJournalIndexImport } from './routes/(protected)/_dashboard/journal/index'
+import { Route as protectedDashboardHomeIndexImport } from './routes/(protected)/_dashboard/home/index'
+import { Route as protectedDashboardChatIndexImport } from './routes/(protected)/_dashboard/chat/index'
+
+// Create Virtual Routes
+
+const protectedImport = createFileRoute('/(protected)')()
 
 // Create/Update Routes
 
-const DashboardrootRoute = DashboardrootImport.update({
-  id: '/dashboard/__root',
+const protectedRoute = protectedImport.update({
+  id: '/(protected)',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -29,17 +38,44 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ChatPageRoute = ChatPageImport.update({
-  id: '/chat/page',
-  path: '/chat/page',
+const protectedDashboardRoute = protectedDashboardImport.update({
+  id: '/_dashboard',
+  getParentRoute: () => protectedRoute,
+} as any)
+
+const authLoginIndexRoute = authLoginIndexImport.update({
+  id: '/(auth)/login/',
+  path: '/login/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const authLoginPageRoute = authLoginPageImport.update({
-  id: '/(auth)/login/page',
-  path: '/login/page',
-  getParentRoute: () => rootRoute,
-} as any)
+const protectedDashboardQuestionnaireIndexRoute =
+  protectedDashboardQuestionnaireIndexImport.update({
+    id: '/questionnaire/',
+    path: '/questionnaire/',
+    getParentRoute: () => protectedDashboardRoute,
+  } as any)
+
+const protectedDashboardJournalIndexRoute =
+  protectedDashboardJournalIndexImport.update({
+    id: '/journal/',
+    path: '/journal/',
+    getParentRoute: () => protectedDashboardRoute,
+  } as any)
+
+const protectedDashboardHomeIndexRoute =
+  protectedDashboardHomeIndexImport.update({
+    id: '/home/',
+    path: '/home/',
+    getParentRoute: () => protectedDashboardRoute,
+  } as any)
+
+const protectedDashboardChatIndexRoute =
+  protectedDashboardChatIndexImport.update({
+    id: '/chat/',
+    path: '/chat/',
+    getParentRoute: () => protectedDashboardRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -52,80 +88,148 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/chat/page': {
-      id: '/chat/page'
-      path: '/chat/page'
-      fullPath: '/chat/page'
-      preLoaderRoute: typeof ChatPageImport
+    '/(protected)': {
+      id: '/(protected)'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof protectedImport
       parentRoute: typeof rootRoute
     }
-    '/dashboard/__root': {
-      id: '/dashboard/__root'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardrootImport
+    '/(protected)/_dashboard': {
+      id: '/(protected)/_dashboard'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof protectedDashboardImport
+      parentRoute: typeof protectedRoute
+    }
+    '/(auth)/login/': {
+      id: '/(auth)/login/'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof authLoginIndexImport
       parentRoute: typeof rootRoute
     }
-    '/(auth)/login/page': {
-      id: '/(auth)/login/page'
-      path: '/login/page'
-      fullPath: '/login/page'
-      preLoaderRoute: typeof authLoginPageImport
-      parentRoute: typeof rootRoute
+    '/(protected)/_dashboard/chat/': {
+      id: '/(protected)/_dashboard/chat/'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof protectedDashboardChatIndexImport
+      parentRoute: typeof protectedDashboardImport
+    }
+    '/(protected)/_dashboard/home/': {
+      id: '/(protected)/_dashboard/home/'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof protectedDashboardHomeIndexImport
+      parentRoute: typeof protectedDashboardImport
+    }
+    '/(protected)/_dashboard/journal/': {
+      id: '/(protected)/_dashboard/journal/'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof protectedDashboardJournalIndexImport
+      parentRoute: typeof protectedDashboardImport
+    }
+    '/(protected)/_dashboard/questionnaire/': {
+      id: '/(protected)/_dashboard/questionnaire/'
+      path: '/questionnaire'
+      fullPath: '/questionnaire'
+      preLoaderRoute: typeof protectedDashboardQuestionnaireIndexImport
+      parentRoute: typeof protectedDashboardImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface protectedDashboardRouteChildren {
+  protectedDashboardChatIndexRoute: typeof protectedDashboardChatIndexRoute
+  protectedDashboardHomeIndexRoute: typeof protectedDashboardHomeIndexRoute
+  protectedDashboardJournalIndexRoute: typeof protectedDashboardJournalIndexRoute
+  protectedDashboardQuestionnaireIndexRoute: typeof protectedDashboardQuestionnaireIndexRoute
+}
+
+const protectedDashboardRouteChildren: protectedDashboardRouteChildren = {
+  protectedDashboardChatIndexRoute: protectedDashboardChatIndexRoute,
+  protectedDashboardHomeIndexRoute: protectedDashboardHomeIndexRoute,
+  protectedDashboardJournalIndexRoute: protectedDashboardJournalIndexRoute,
+  protectedDashboardQuestionnaireIndexRoute:
+    protectedDashboardQuestionnaireIndexRoute,
+}
+
+const protectedDashboardRouteWithChildren =
+  protectedDashboardRoute._addFileChildren(protectedDashboardRouteChildren)
+
+interface protectedRouteChildren {
+  protectedDashboardRoute: typeof protectedDashboardRouteWithChildren
+}
+
+const protectedRouteChildren: protectedRouteChildren = {
+  protectedDashboardRoute: protectedDashboardRouteWithChildren,
+}
+
+const protectedRouteWithChildren = protectedRoute._addFileChildren(
+  protectedRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/chat/page': typeof ChatPageRoute
-  '/dashboard': typeof DashboardrootRoute
-  '/login/page': typeof authLoginPageRoute
+  '/': typeof protectedDashboardRouteWithChildren
+  '/login': typeof authLoginIndexRoute
+  '/chat': typeof protectedDashboardChatIndexRoute
+  '/home': typeof protectedDashboardHomeIndexRoute
+  '/journal': typeof protectedDashboardJournalIndexRoute
+  '/questionnaire': typeof protectedDashboardQuestionnaireIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/chat/page': typeof ChatPageRoute
-  '/dashboard': typeof DashboardrootRoute
-  '/login/page': typeof authLoginPageRoute
+  '/': typeof protectedDashboardRouteWithChildren
+  '/login': typeof authLoginIndexRoute
+  '/chat': typeof protectedDashboardChatIndexRoute
+  '/home': typeof protectedDashboardHomeIndexRoute
+  '/journal': typeof protectedDashboardJournalIndexRoute
+  '/questionnaire': typeof protectedDashboardQuestionnaireIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/chat/page': typeof ChatPageRoute
-  '/dashboard/__root': typeof DashboardrootRoute
-  '/(auth)/login/page': typeof authLoginPageRoute
+  '/(protected)': typeof protectedRouteWithChildren
+  '/(protected)/_dashboard': typeof protectedDashboardRouteWithChildren
+  '/(auth)/login/': typeof authLoginIndexRoute
+  '/(protected)/_dashboard/chat/': typeof protectedDashboardChatIndexRoute
+  '/(protected)/_dashboard/home/': typeof protectedDashboardHomeIndexRoute
+  '/(protected)/_dashboard/journal/': typeof protectedDashboardJournalIndexRoute
+  '/(protected)/_dashboard/questionnaire/': typeof protectedDashboardQuestionnaireIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chat/page' | '/dashboard' | '/login/page'
+  fullPaths: '/' | '/login' | '/chat' | '/home' | '/journal' | '/questionnaire'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chat/page' | '/dashboard' | '/login/page'
+  to: '/' | '/login' | '/chat' | '/home' | '/journal' | '/questionnaire'
   id:
     | '__root__'
     | '/'
-    | '/chat/page'
-    | '/dashboard/__root'
-    | '/(auth)/login/page'
+    | '/(protected)'
+    | '/(protected)/_dashboard'
+    | '/(auth)/login/'
+    | '/(protected)/_dashboard/chat/'
+    | '/(protected)/_dashboard/home/'
+    | '/(protected)/_dashboard/journal/'
+    | '/(protected)/_dashboard/questionnaire/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ChatPageRoute: typeof ChatPageRoute
-  DashboardrootRoute: typeof DashboardrootRoute
-  authLoginPageRoute: typeof authLoginPageRoute
+  protectedRoute: typeof protectedRouteWithChildren
+  authLoginIndexRoute: typeof authLoginIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ChatPageRoute: ChatPageRoute,
-  DashboardrootRoute: DashboardrootRoute,
-  authLoginPageRoute: authLoginPageRoute,
+  protectedRoute: protectedRouteWithChildren,
+  authLoginIndexRoute: authLoginIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -139,22 +243,47 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/chat/page",
-        "/dashboard/__root",
-        "/(auth)/login/page"
+        "/(protected)",
+        "/(auth)/login/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/chat/page": {
-      "filePath": "chat/page.tsx"
+    "/(protected)": {
+      "filePath": "(protected)",
+      "children": [
+        "/(protected)/_dashboard"
+      ]
     },
-    "/dashboard/__root": {
-      "filePath": "dashboard/__root.tsx"
+    "/(protected)/_dashboard": {
+      "filePath": "(protected)/_dashboard.tsx",
+      "parent": "/(protected)",
+      "children": [
+        "/(protected)/_dashboard/chat/",
+        "/(protected)/_dashboard/home/",
+        "/(protected)/_dashboard/journal/",
+        "/(protected)/_dashboard/questionnaire/"
+      ]
     },
-    "/(auth)/login/page": {
-      "filePath": "(auth)/login/page.tsx"
+    "/(auth)/login/": {
+      "filePath": "(auth)/login/index.tsx"
+    },
+    "/(protected)/_dashboard/chat/": {
+      "filePath": "(protected)/_dashboard/chat/index.tsx",
+      "parent": "/(protected)/_dashboard"
+    },
+    "/(protected)/_dashboard/home/": {
+      "filePath": "(protected)/_dashboard/home/index.tsx",
+      "parent": "/(protected)/_dashboard"
+    },
+    "/(protected)/_dashboard/journal/": {
+      "filePath": "(protected)/_dashboard/journal/index.tsx",
+      "parent": "/(protected)/_dashboard"
+    },
+    "/(protected)/_dashboard/questionnaire/": {
+      "filePath": "(protected)/_dashboard/questionnaire/index.tsx",
+      "parent": "/(protected)/_dashboard"
     }
   }
 }

@@ -1,13 +1,7 @@
+import { SignIn } from "@clerk/clerk-react";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  SignedIn,
-  SignedOut,
-  SignIn,
-  SignInButton,
-  UserButton,
-} from "@clerk/clerk-react";
 
-export const Route = createFileRoute("/(auth)/login/page")({
+export const Route = createFileRoute("/(auth)/login/")({
   component: LoginPage,
 });
 
