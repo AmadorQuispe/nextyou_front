@@ -3,8 +3,9 @@ import { createRoot } from "react-dom/client";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { esES } from "@clerk/localizations";
 import { Toaster } from "sonner";
-import { App } from "./app";
+
 import "./index.css";
+import { App } from "./App";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
