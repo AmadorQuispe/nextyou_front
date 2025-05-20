@@ -2,11 +2,19 @@ import type {
   Answer,
   AnswerCreationData,
   Questionnaire,
+  QuestionnaireWithAnswer,
 } from "@/types/questionnaire";
 import api from "./api";
 
 export async function getQuestionnaires(): Promise<Questionnaire[]> {
   const response = await api.get<Questionnaire[]>("/questionnaires");
+  return response.data;
+}
+
+export async function getQuestionnaireWithAnswer() {
+  const response = await api.get<QuestionnaireWithAnswer[]>(
+    "/questionnaires?with_answer=true"
+  );
   return response.data;
 }
 

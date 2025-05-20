@@ -15,7 +15,6 @@ export function ChatPanel({ sessionId }: ChatPanelProps) {
   const {
     response,
     sendMessage,
-    title,
     sessionIdJustCreated,
     markSessionRedirected,
     resetSession,

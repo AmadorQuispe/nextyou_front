@@ -16,6 +16,15 @@ export interface Question {
   updated_at: string | null;
 }
 
+export interface QuestionWithAnswer extends Question {
+  answer: Answer | null;
+}
+
+export interface QuestionnaireWithAnswer
+  extends Omit<Questionnaire, "questions"> {
+  questions: QuestionWithAnswer[];
+}
+
 export type FormData = {
   [questionId: string]: string;
 };

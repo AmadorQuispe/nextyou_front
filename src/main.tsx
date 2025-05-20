@@ -13,7 +13,7 @@ if (!PUBLISHABLE_KEY) {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <>
+  <StrictMode>
     <ClerkProvider
       publishableKey={PUBLISHABLE_KEY}
       afterSignOutUrl='/'
@@ -42,5 +42,5 @@ createRoot(document.getElementById("root")!).render(
       <App />
       <Toaster />
     </ClerkProvider>
-  </>
+  </StrictMode>
 );
