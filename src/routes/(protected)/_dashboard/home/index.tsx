@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import SilhouetteSVG from "../assets/image-hero.svg";
+import SilhouetteSVG from "../../../../assets/image-hero.svg";
 
 export const Route = createFileRoute("/(protected)/_dashboard/home/")({
   component: HomePage,
