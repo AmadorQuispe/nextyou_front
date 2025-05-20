@@ -15,11 +15,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
 import { Route as protectedDashboardImport } from './routes/(protected)/_dashboard'
+import { Route as protectedOnboardingIndexImport } from './routes/(protected)/onboarding/index'
 import { Route as authLoginIndexImport } from './routes/(auth)/login/index'
 import { Route as protectedDashboardQuestionnaireIndexImport } from './routes/(protected)/_dashboard/questionnaire/index'
 import { Route as protectedDashboardJournalIndexImport } from './routes/(protected)/_dashboard/journal/index'
 import { Route as protectedDashboardHomeIndexImport } from './routes/(protected)/_dashboard/home/index'
-import { Route as protectedDashboardChatIndexImport } from './routes/(protected)/_dashboard/chat/index'
+import { Route as protectedDashboardChatSessionIdImport } from './routes/(protected)/_dashboard/chat/$sessionId'
 
 // Create Virtual Routes
 
@@ -40,6 +41,12 @@ const IndexRoute = IndexImport.update({
 
 const protectedDashboardRoute = protectedDashboardImport.update({
   id: '/_dashboard',
+  getParentRoute: () => protectedRoute,
+} as any)
+
+const protectedOnboardingIndexRoute = protectedOnboardingIndexImport.update({
+  id: '/onboarding/',
+  path: '/onboarding/',
   getParentRoute: () => protectedRoute,
 } as any)
 
@@ -70,10 +77,10 @@ const protectedDashboardHomeIndexRoute =
     getParentRoute: () => protectedDashboardRoute,
   } as any)
 
-const protectedDashboardChatIndexRoute =
-  protectedDashboardChatIndexImport.update({
-    id: '/chat/',
-    path: '/chat/',
+const protectedDashboardChatSessionIdRoute =
+  protectedDashboardChatSessionIdImport.update({
+    id: '/chat/$sessionId',
+    path: '/chat/$sessionId',
     getParentRoute: () => protectedDashboardRoute,
   } as any)
 
@@ -109,11 +116,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authLoginIndexImport
       parentRoute: typeof rootRoute
     }
-    '/(protected)/_dashboard/chat/': {
-      id: '/(protected)/_dashboard/chat/'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof protectedDashboardChatIndexImport
+    '/(protected)/onboarding/': {
+      id: '/(protected)/onboarding/'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof protectedOnboardingIndexImport
+      parentRoute: typeof protectedImport
+    }
+    '/(protected)/_dashboard/chat/$sessionId': {
+      id: '/(protected)/_dashboard/chat/$sessionId'
+      path: '/chat/$sessionId'
+      fullPath: '/chat/$sessionId'
+      preLoaderRoute: typeof protectedDashboardChatSessionIdImport
       parentRoute: typeof protectedDashboardImport
     }
     '/(protected)/_dashboard/home/': {
@@ -143,14 +157,14 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface protectedDashboardRouteChildren {
-  protectedDashboardChatIndexRoute: typeof protectedDashboardChatIndexRoute
+  protectedDashboardChatSessionIdRoute: typeof protectedDashboardChatSessionIdRoute
   protectedDashboardHomeIndexRoute: typeof protectedDashboardHomeIndexRoute
   protectedDashboardJournalIndexRoute: typeof protectedDashboardJournalIndexRoute
   protectedDashboardQuestionnaireIndexRoute: typeof protectedDashboardQuestionnaireIndexRoute
 }
 
 const protectedDashboardRouteChildren: protectedDashboardRouteChildren = {
-  protectedDashboardChatIndexRoute: protectedDashboardChatIndexRoute,
+  protectedDashboardChatSessionIdRoute: protectedDashboardChatSessionIdRoute,
   protectedDashboardHomeIndexRoute: protectedDashboardHomeIndexRoute,
   protectedDashboardJournalIndexRoute: protectedDashboardJournalIndexRoute,
   protectedDashboardQuestionnaireIndexRoute:
@@ -162,10 +176,12 @@ const protectedDashboardRouteWithChildren =
 
 interface protectedRouteChildren {
   protectedDashboardRoute: typeof protectedDashboardRouteWithChildren
+  protectedOnboardingIndexRoute: typeof protectedOnboardingIndexRoute
 }
 
 const protectedRouteChildren: protectedRouteChildren = {
   protectedDashboardRoute: protectedDashboardRouteWithChildren,
+  protectedOnboardingIndexRoute: protectedOnboardingIndexRoute,
 }
 
 const protectedRouteWithChildren = protectedRoute._addFileChildren(
@@ -175,7 +191,8 @@ const protectedRouteWithChildren = protectedRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   '/': typeof protectedDashboardRouteWithChildren
   '/login': typeof authLoginIndexRoute
-  '/chat': typeof protectedDashboardChatIndexRoute
+  '/onboarding': typeof protectedOnboardingIndexRoute
+  '/chat/$sessionId': typeof protectedDashboardChatSessionIdRoute
   '/home': typeof protectedDashboardHomeIndexRoute
   '/journal': typeof protectedDashboardJournalIndexRoute
   '/questionnaire': typeof protectedDashboardQuestionnaireIndexRoute
@@ -184,7 +201,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof protectedDashboardRouteWithChildren
   '/login': typeof authLoginIndexRoute
-  '/chat': typeof protectedDashboardChatIndexRoute
+  '/onboarding': typeof protectedOnboardingIndexRoute
+  '/chat/$sessionId': typeof protectedDashboardChatSessionIdRoute
   '/home': typeof protectedDashboardHomeIndexRoute
   '/journal': typeof protectedDashboardJournalIndexRoute
   '/questionnaire': typeof protectedDashboardQuestionnaireIndexRoute
@@ -196,7 +214,8 @@ export interface FileRoutesById {
   '/(protected)': typeof protectedRouteWithChildren
   '/(protected)/_dashboard': typeof protectedDashboardRouteWithChildren
   '/(auth)/login/': typeof authLoginIndexRoute
-  '/(protected)/_dashboard/chat/': typeof protectedDashboardChatIndexRoute
+  '/(protected)/onboarding/': typeof protectedOnboardingIndexRoute
+  '/(protected)/_dashboard/chat/$sessionId': typeof protectedDashboardChatSessionIdRoute
   '/(protected)/_dashboard/home/': typeof protectedDashboardHomeIndexRoute
   '/(protected)/_dashboard/journal/': typeof protectedDashboardJournalIndexRoute
   '/(protected)/_dashboard/questionnaire/': typeof protectedDashboardQuestionnaireIndexRoute
@@ -204,16 +223,31 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/chat' | '/home' | '/journal' | '/questionnaire'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/onboarding'
+    | '/chat/$sessionId'
+    | '/home'
+    | '/journal'
+    | '/questionnaire'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/chat' | '/home' | '/journal' | '/questionnaire'
+  to:
+    | '/'
+    | '/login'
+    | '/onboarding'
+    | '/chat/$sessionId'
+    | '/home'
+    | '/journal'
+    | '/questionnaire'
   id:
     | '__root__'
     | '/'
     | '/(protected)'
     | '/(protected)/_dashboard'
     | '/(auth)/login/'
-    | '/(protected)/_dashboard/chat/'
+    | '/(protected)/onboarding/'
+    | '/(protected)/_dashboard/chat/$sessionId'
     | '/(protected)/_dashboard/home/'
     | '/(protected)/_dashboard/journal/'
     | '/(protected)/_dashboard/questionnaire/'
@@ -253,14 +287,15 @@ export const routeTree = rootRoute
     "/(protected)": {
       "filePath": "(protected)",
       "children": [
-        "/(protected)/_dashboard"
+        "/(protected)/_dashboard",
+        "/(protected)/onboarding/"
       ]
     },
     "/(protected)/_dashboard": {
       "filePath": "(protected)/_dashboard.tsx",
       "parent": "/(protected)",
       "children": [
-        "/(protected)/_dashboard/chat/",
+        "/(protected)/_dashboard/chat/$sessionId",
         "/(protected)/_dashboard/home/",
         "/(protected)/_dashboard/journal/",
         "/(protected)/_dashboard/questionnaire/"
@@ -269,8 +304,12 @@ export const routeTree = rootRoute
     "/(auth)/login/": {
       "filePath": "(auth)/login/index.tsx"
     },
-    "/(protected)/_dashboard/chat/": {
-      "filePath": "(protected)/_dashboard/chat/index.tsx",
+    "/(protected)/onboarding/": {
+      "filePath": "(protected)/onboarding/index.tsx",
+      "parent": "/(protected)"
+    },
+    "/(protected)/_dashboard/chat/$sessionId": {
+      "filePath": "(protected)/_dashboard/chat/$sessionId.tsx",
       "parent": "/(protected)/_dashboard"
     },
     "/(protected)/_dashboard/home/": {

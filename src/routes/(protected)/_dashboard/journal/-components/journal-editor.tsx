@@ -1,54 +1,32 @@
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Save, X } from "lucide-react";
 
-type JournalEntry = {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  updatedAt?: string;
-};
-
-type Props = {
-  initial?: JournalEntry | null;
-  onSave: (entry: { title: string; content: string }) => void;
+export function JournalEditor({
+  value,
+  onChange,
+  onCancel,
+  onSave,
+}: {
+  value: string;
+  onChange: (v: string) => void;
   onCancel: () => void;
-};
-
-export default function JournalEditor({ initial, onSave, onCancel }: Props) {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-
-  useEffect(() => {
-    if (initial) {
-      setTitle(initial.title);
-      setContent(initial.content);
-    } else {
-      setTitle("");
-      setContent("");
-    }
-  }, [initial]);
-
+  onSave: () => void;
+}) {
   return (
-    <div className='space-y-4'>
-      <Input
-        placeholder='Título de tu entrada'
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+    <div className='bg-accent/2 p-4 rounded-md space-y-2'>
       <Textarea
-        placeholder='Escribe lo que quieras recordar, reflexionar o expresar...'
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className='min-h-[160px]'
+        className='min-h-[100px]'
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
       />
       <div className='flex justify-end gap-2'>
-        <Button variant='ghost' onClick={onCancel}>
-          Cancelar
+        <Button variant='ghost' size='sm' onClick={onCancel}>
+          <X className='w-4 h-4 mr-1' /> Cancelar
         </Button>
-        <Button onClick={() => onSave({ title, content })}>Guardar</Button>
+        <Button size='sm' onClick={onSave}>
+          <Save className='w-4 h-4 mr-1' /> Guardar
+        </Button>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Folder, Forward, MoreHorizontal, type LucideIcon } from "lucide-react";
+import { Folder, Forward, MoreHorizontal } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -15,29 +15,31 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { getChatSessions } from "@/service/chat_session.service";
+import { Link, useLocation } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 
-export function NavProjects({
-  projects,
-}: {
-  projects: {
-    name: string;
-    url: string;
-    icon: LucideIcon;
-  }[];
-}) {
+export function NavHistories() {
   const { isMobile } = useSidebar();
+  const { pathname } = useLocation();
+  const { data: chatSessions } = useQuery({
+    queryKey: ["chat_sessions"],
+    queryFn: () => getChatSessions(),
+  });
 
   return (
     <SidebarGroup className='group-data-[collapsible=icon]:hidden'>
-      <SidebarGroupLabel>Recientes</SidebarGroupLabel>
+      <SidebarGroupLabel>Chats recientes</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
+        {chatSessions?.map((item) => (
+          <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon />
-                <span>{item.name}</span>
-              </a>
+              <Link
+                to={`/chat/$sessionId`}
+                params={{ sessionId: item.id }}
+                data-active={pathname === `/chat/${item.id}`}>
+                <span>{item.title}</span>
+              </Link>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -62,12 +64,6 @@ export function NavProjects({
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
-          <SidebarMenuButton className='text-sidebar-foreground/70'>
-            <MoreHorizontal className='text-sidebar-foreground/70' />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
   );

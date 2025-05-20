@@ -1,4 +1,4 @@
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -6,6 +6,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Link, useLocation } from "@tanstack/react-router";
 
 export function NavMain({
   items,
@@ -21,17 +22,18 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const { pathname } = useLocation();
+
   return (
     <SidebarGroup>
       <SidebarMenu>
         {items.map((item) => (
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip={item.title}>
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
-              {item?.items && (
-                <ChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
-              )}
+          <SidebarMenuItem key={item.title}>
+            <SidebarMenuButton tooltip={item.title} asChild>
+              <Link to={item.url} data-active={pathname === item.url}>
+                {item.icon && <item.icon className='shrink-0' />}
+                <span>{item.title}</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

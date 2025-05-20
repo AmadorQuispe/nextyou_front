@@ -1,100 +1,123 @@
-import { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { FormData, Questionnaire } from "@/types/questionnaire";
+import { useMultiStep } from "@/hooks/use-multi-step";
+import { createFormSchema } from "../-adapter/form-schema";
+import { QuestionnaireStep } from "./questionnaire-step";
+import { StepNavigation } from "./step-navigation";
+import { Summary } from "./summary";
+import { QuestionnaireProgress } from "./questionnaire-progress";
+import { useQuery } from "@tanstack/react-query";
+import { getAnswers } from "@/service/questionnaire.service";
 
-type Question = {
-  id: string;
-  prompt: string;
-  helper?: string;
-};
+interface MultiStepFormProps {
+  questionnaires: Questionnaire[];
+  onSubmit: (data: FormData) => void;
+}
 
-type Step = {
-  step: number;
-  title: string;
-  questions: Question[];
-};
+export function MultiStepForm({
+  questionnaires,
+  onSubmit,
+}: MultiStepFormProps) {
+  const sortedQuestionnaires = [...questionnaires].sort(
+    (a, b) => a.position - b.position
+  );
 
-type QuestionnaireData = {
-  questionnaire: Step[];
-};
+  const {
+    currentStepIndex,
+    currentStep,
+    isFirstStep,
+    isLastStep,
+    totalSteps,
+    nextStep,
+    prevStep,
+    goToStep,
+  } = useMultiStep(sortedQuestionnaires);
 
-type Props = {
-  data: QuestionnaireData;
-  initialValues?: Record<string, string>;
-};
+  const { data: answers } = useQuery({
+    queryKey: ["answers"],
+    queryFn: () => getAnswers(),
+  });
 
-export default function MultiStepForm({ data, initialValues = {} }: Props) {
-  const [stepIndex, setStepIndex] = useState(0);
-  const [formData, setFormData] =
-    useState<Record<string, string>>(initialValues);
+  const [showSummary, setShowSummary] = useState(false);
 
-  const steps = data.questionnaire;
-  const currentStep = steps[stepIndex];
+  const formSchema = createFormSchema(sortedQuestionnaires);
+  const methods = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    mode: "onChange",
+  });
 
-  const updateField = (id: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [id]: value }));
+  const handleSubmit = methods.handleSubmit((data) => {
+    if (isLastStep) {
+      setShowSummary(true);
+    } else {
+      onSubmit(data);
+    }
+  });
+
+  const handleNextStep = () => {
+    if (isLastStep) {
+      setShowSummary(true);
+    } else {
+      nextStep();
+    }
   };
 
-  const next = () =>
-    setStepIndex((prev) => Math.min(prev + 1, steps.length - 1));
-  const back = () => setStepIndex((prev) => Math.max(prev - 1, 0));
-
-  const handleSubmit = () => {
-    console.log("Final data:", formData);
-    // Aquí podrías usar un callback o un API request
+  const goToQuestionnaireStep = (id: string) => {
+    const index = sortedQuestionnaires.findIndex((q) => q.id === id);
+    if (index !== -1) {
+      setShowSummary(false);
+      goToStep(index);
+    }
   };
+
+  const handleFinish = () => {
+    onSubmit(methods.getValues());
+  };
+
+  useEffect(() => {
+    if (answers && answers.length > 0) {
+      const data = Object.fromEntries(
+        answers.map((a) => [a.question_id, a.content])
+      );
+      methods.reset(data);
+    }
+  }, [answers]);
 
   return (
-    <div className='max-w-3xl mt-4 mx-auto px-6 py-8 bg-card  rounded-md'>
-      <h2 className='text-xl font-bold text-foreground mb-4'>
-        {currentStep.title}
-      </h2>
+    <FormProvider {...methods}>
+      <form
+        onSubmit={handleSubmit}
+        className='max-w-3xl mt-4 mx-auto px-6 py-8 bg-card rounded-md'>
+        <QuestionnaireProgress
+          currentStep={currentStepIndex}
+          totalSteps={totalSteps}
+          steps={sortedQuestionnaires.map((q) => q.title)}
+        />
 
-      <div className='space-y-6'>
-        {currentStep.questions.map((q) => (
-          <div key={q.id} className='space-y-2'>
-            <Label
-              htmlFor={q.id}
-              className='text-base font-medium text-foreground'>
-              {q.prompt}
-            </Label>
-            {q.helper && (
-              <p className='text-sm text-muted-foreground'>{q.helper}</p>
-            )}
-            <Textarea
-              id={q.id}
-              value={formData[q.id] || ""}
-              onChange={(e) => updateField(q.id, e.target.value)}
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className='flex justify-between mt-8'>
-        <Button variant='ghost' onClick={back} disabled={stepIndex === 0}>
-          Atrás
-        </Button>
-
-        {stepIndex < steps.length - 1 ? (
-          <Button onClick={next}>Siguiente</Button>
-        ) : (
-          <Button onClick={handleSubmit}>Finalizar</Button>
-        )}
-      </div>
-
-      <div className='mt-6 flex items-center justify-center gap-2'>
-        {steps.map((_, i) => (
-          <div
-            key={i}
-            className={cn(
-              "h-2 w-2 rounded-full",
-              i === stepIndex ? "bg-primary" : "bg-muted"
-            )}
+        {showSummary ? (
+          <Summary
+            data={methods.getValues()}
+            questionnaires={sortedQuestionnaires}
+            onBack={() => setShowSummary(false)}
+            onBackToStep={goToQuestionnaireStep}
+            onSubmit={handleFinish}
           />
-        ))}
-      </div>
-    </div>
+        ) : (
+          <>
+            <QuestionnaireStep questionnaire={currentStep} />
+
+            <StepNavigation
+              isFirstStep={isFirstStep}
+              isLastStep={isLastStep}
+              questionIds={currentStep.questions.map((q) => q.id)}
+              onPrevious={prevStep}
+              onNext={handleNextStep}
+            />
+          </>
+        )}
+      </form>
+    </FormProvider>
   );
 }

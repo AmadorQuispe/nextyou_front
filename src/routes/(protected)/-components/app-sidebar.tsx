@@ -1,15 +1,13 @@
 import * as React from "react";
 import {
   AudioWaveform,
-  Frame,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
+  Bot,
+  MessageSquarePlus,
+  NotebookPen,
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
-import { NavProjects } from "./nav-projects";
+import { NavHistories } from "./nav-histories";
 import { NavUser } from "./nav-user";
 import {
   Sidebar,
@@ -22,38 +20,21 @@ import { AppLogo } from "./app-logo";
 
 // This is sample data.
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Nueva conversación",
-      url: "#",
-      icon: SquareTerminal,
+      url: "/chat/new",
+      icon: MessageSquarePlus,
     },
     {
       title: "Mi diario",
-      url: "#",
-      icon: Settings2,
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      url: "/journal",
+      icon: NotebookPen,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      title: "Mi cuestionario",
+      url: "/questionnaire",
+      icon: Bot,
     },
   ],
 };
@@ -66,10 +47,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavHistories />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -1,154 +1,189 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { Pencil, Plus, Save, Trash2, X } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { es } from "date-fns/locale";
-
-type JournalEntry = {
-  id: string;
-  content: string;
-  createdAt: string;
-  updatedAt?: string;
-};
+import { Plus } from "lucide-react";
+import {
+  createJournal,
+  deleteJournal,
+  getMyJournals,
+  updateJournal,
+} from "@/service/journal.service";
+import type { Journal } from "@/types/journal";
+import { JournalEditor } from "./-components/journal-editor";
+import { JournalEntry } from "./-components/journal-entry";
+import { toast } from "sonner";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/(protected)/_dashboard/journal/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const { data, refetch, isLoading } = useQuery<Journal[]>({
+    queryKey: ["journal"],
+    queryFn: () => getMyJournals(),
+  });
+  const { mutate: createJournalSubmit } = useMutation({
+    mutationFn: createJournal,
+  });
+  const { mutate: updateJournalSubmit } = useMutation({
+    mutationFn: updateJournal,
+  });
+  const { mutate: deleteJournalSubmit } = useMutation({
+    mutationFn: deleteJournal,
+  });
+
   const [newEntryMode, setNewEntryMode] = useState(false);
   const [newContent, setNewContent] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
 
-  const sortedEntries = [...entries].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  const sortedEntries = useMemo(
+    () =>
+      data
+        ? [...data].sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+        : [],
+    [data]
   );
 
-  const handleSaveNew = () => {
-    const newEntry: JournalEntry = {
-      id: crypto.randomUUID(),
-      content: newContent,
-      createdAt: new Date().toISOString(),
-    };
-    setEntries((prev) => [...prev, newEntry]);
-    setNewContent("");
-    setNewEntryMode(false);
-  };
+  const handleSaveNew = useCallback(() => {
+    if (!newContent.trim()) {
+      toast.error("No puedes guardar una entrada vacía");
+      return;
+    }
 
-  const handleEditSave = (id: string) => {
-    setEntries((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, content: editContent } : e))
+    createJournalSubmit(newContent, {
+      onSuccess: () => {
+        setNewContent("");
+        setNewEntryMode(false);
+        toast.success("Entrada guardada con éxito");
+        refetch(); // Recargar datos del servidor
+      },
+      onError: () => {
+        toast.error("Error al guardar la entrada");
+      },
+    });
+  }, [newContent, createJournalSubmit, refetch]);
+
+  const handleEditSave = useCallback(() => {
+    if (!editContent.trim() || !editingId) {
+      toast.error("No puedes guardar una entrada vacía");
+      return;
+    }
+
+    updateJournalSubmit(
+      { id: editingId, content: editContent },
+      {
+        onSuccess: () => {
+          setEditingId(null);
+          setEditContent("");
+          toast.success("Entrada actualizada con éxito");
+          refetch(); // Recargar datos del servidor
+        },
+        onError: () => {
+          toast.error("Error al actualizar la entrada");
+        },
+      }
     );
-    setEditingId(null);
-    setEditContent("");
-  };
+  }, [editingId, editContent, updateJournalSubmit, refetch]);
 
-  const handleCancel = () => {
-    setNewEntryMode(false);
-    setEditingId(null);
-    setNewContent("");
-    setEditContent("");
-  };
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteJournalSubmit(id, {
+        onSuccess: () => {
+          toast.success("Entrada eliminada con éxito");
+          refetch(); // Recargar datos del servidor
+        },
+        onError: () => {
+          toast.error("Error al eliminar la entrada");
+        },
+      });
+    },
+    [deleteJournalSubmit, refetch]
+  );
 
-  const handleEdit = (entry: JournalEntry) => {
+  const handleStartEdit = useCallback((entry: Journal) => {
     setEditingId(entry.id);
     setEditContent(entry.content);
-  };
+  }, []);
 
-  const handleDelete = (id: string) => {
-    setEntries((prev) => prev.filter((e) => e.id !== id));
-  };
+  const handleCancel = useCallback(() => {
+    setNewEntryMode(false);
+    setEditingId(null);
+    setNewContent("");
+    setEditContent("");
+  }, []);
 
-  return (
-    <div className='max-w-3xl w-full mx-auto space-y-4'>
-      <h2 className='text-2xl font-semibold p-0 m-0'>Tu historia de vida</h2>
+  const renderEmptyState = () => (
+    <div className='mt-10 space-y-4'>
       <p className='text-muted-foreground'>
-        Escribe aquí todo lo que te pasa y piensas.
+        Aún no tienes entradas. ¿Quieres comenzar?
       </p>
+      <Button onClick={() => setNewEntryMode(true)}>
+        <Plus className='w-4 h-4 mr-2' /> Escribir ahora
+      </Button>
+    </div>
+  );
 
-      {entries.length === 0 && !newEntryMode && (
-        <div className='mt-10 space-y-4'>
-          <p className='text-muted-foreground'>
-            Aún no tienes entradas. ¿Quieres comenzar?
-          </p>
-          <Button onClick={() => setNewEntryMode(true)}>
-            <Plus className='w-4 h-4 mr-2' /> Escribir ahora
-          </Button>
-        </div>
-      )}
-
-      {/* Entradas */}
-      {sortedEntries.map((entry) => (
+  const renderEntries = () => (
+    <>
+      {!newEntryMode && (
         <div
-          key={entry.id}
-          className='bg-accent/5 p-4 rounded-md shadow-sm space-y-2 relative'>
-          <p className='font-semibold text-sm text-muted-foreground'>
-            {format(new Date(entry.createdAt), "PPPP", { locale: es })}
-          </p>
-
-          {editingId === entry.id ? (
-            <>
-              <Textarea
-                className='mt-1'
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-              />
-              <div className='flex justify-end gap-2 mt-2'>
-                <Button variant='ghost' size='sm' onClick={handleCancel}>
-                  <X className='w-4 h-4 mr-1' /> Cancelar
-                </Button>
-                <Button size='sm' onClick={() => handleEditSave(entry.id)}>
-                  <Save className='w-4 h-4 mr-1' /> Guardar
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className='whitespace-pre-wrap'>{entry.content}</p>
-              <div className='absolute top-3 right-3 flex gap-2'>
-                <button onClick={() => handleEdit(entry)} title='Editar'>
-                  <Pencil className='w-4 h-4 text-muted-foreground hover:text-primary' />
-                </button>
-                <button onClick={() => handleDelete(entry.id)} title='Eliminar'>
-                  <Trash2 className='w-4 h-4 text-muted-foreground hover:text-destructive' />
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      ))}
-
-      {/* Botón para agregar nueva entrada */}
-      {!newEntryMode && entries.length > 0 && (
-        <div
-          className='bg-accent/15 rounded-md h-10 flex items-center justify-center cursor-pointer hover:bg-accent transition'
+          className='bg-accent/5 rounded-md h-10 flex items-center justify-center cursor-pointer hover:bg-accent transition'
           onClick={() => setNewEntryMode(true)}>
           <Plus className='w-5 h-5 text-muted-foreground' />
         </div>
       )}
-
-      {/* Editor de nueva entrada */}
-      {newEntryMode && (
-        <div className='bg-accent/15 p-4 rounded-md space-y-2'>
-          <Textarea
-            placeholder='Escribe aquí tu texto'
-            value={newContent}
-            onChange={(e) => setNewContent(e.target.value)}
-            className='min-h-[100px]'
+      {sortedEntries.map((entry) =>
+        editingId === entry.id ? (
+          <JournalEditor
+            key={`edit-${entry.id}`}
+            value={editContent}
+            onChange={setEditContent}
+            onCancel={handleCancel}
+            onSave={handleEditSave}
           />
-          <div className='flex justify-end gap-2'>
-            <Button variant='ghost' size='sm' onClick={handleCancel}>
-              <X className='w-4 h-4 mr-1' /> Cancelar
-            </Button>
-            <Button size='sm' onClick={handleSaveNew}>
-              <Save className='w-4 h-4 mr-1' /> Guardar
-            </Button>
-          </div>
+        ) : (
+          <JournalEntry
+            key={entry.id}
+            entry={entry}
+            onEdit={() => handleStartEdit(entry)}
+            onDelete={() => handleDelete(entry.id)}
+          />
+        )
+      )}
+    </>
+  );
+
+  return (
+    <div className='max-w-3xl w-full mx-auto space-y-4'>
+      <h2 className='text-2xl font-semibold'>Tu historia de vida</h2>
+      <p className='text-sm text-muted-foreground'>
+        Escribe aquí todo lo que te pasa y piensas.
+      </p>
+
+      {isLoading ? (
+        <div className='flex justify-center py-10'>
+          <span className='loading loading-spinner loading-md'></span>
         </div>
+      ) : (
+        <>
+          {(!data || data.length === 0) && !newEntryMode && renderEmptyState()}
+
+          {newEntryMode && (
+            <JournalEditor
+              value={newContent}
+              onChange={setNewContent}
+              onCancel={handleCancel}
+              onSave={handleSaveNew}
+            />
+          )}
+
+          {((data && data.length > 0) || newEntryMode) && renderEntries()}
+        </>
       )}
     </div>
   );
