@@ -1,5 +1,5 @@
-import { getQuestionnaireWithAnswer } from "@/service/questionnaire.service";
-import { useQuery } from "@tanstack/react-query";
+import { useQuestionnaires } from "@/querys/use-questionnaires";
+import type { QuestionnaireWithAnswer } from "@/types/questionnaire";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(protected)/_dashboard/questionnaire/")({
@@ -7,9 +7,8 @@ export const Route = createFileRoute("/(protected)/_dashboard/questionnaire/")({
 });
 
 function QuestionnairePage() {
-  const { data: questionnaires } = useQuery({
-    queryKey: ["questionnaires", "with_answer=true"],
-    queryFn: () => getQuestionnaireWithAnswer(),
+  const { data: questionnaires } = useQuestionnaires<QuestionnaireWithAnswer>({
+    withAnswer: true,
   });
   return (
     <>

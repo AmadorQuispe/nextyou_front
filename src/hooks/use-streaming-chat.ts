@@ -1,4 +1,5 @@
 import { baseUrl } from "@/service/api";
+import { useAuth } from "@clerk/clerk-react";
 import { useCallback, useState, useEffect } from "react";
 
 type SendMessagePayload = {
@@ -16,6 +17,7 @@ export function useStreamingChat() {
   const [title, setTitle] = useState<string>();
   const [errors, setErrors] = useState<string[]>([]);
   const [controller, setController] = useState<AbortController | null>(null);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     return () => {
@@ -43,13 +45,18 @@ export function useStreamingChat() {
       setController(abortController);
 
       try {
+        const token = await getToken();
         const url = inputSessionId
           ? `${baseUrl}/chat/${inputSessionId}`
           : `${baseUrl}/chat`;
 
         const res = await fetch(url, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+
           credentials: "include",
           body: JSON.stringify({ message: content }),
           signal: abortController.signal,
@@ -96,6 +103,7 @@ export function useStreamingChat() {
                   fullText += deltaData.c;
                   setResponse(fullText);
                 }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
               } catch (e: any) {
                 setErrors((errors) => [
                   ...errors,
@@ -105,6 +113,7 @@ export function useStreamingChat() {
             }
           }
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         if (err.name !== "AbortError") {
           setErrors((errors) => [...errors, err?.message ?? "Unknown error"]);

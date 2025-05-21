@@ -1,60 +1,51 @@
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
-
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./-components/app-sidebar";
 import { useAuth } from "@clerk/clerk-react";
-import { useEffect, useState } from "react";
-import { establishSession } from "@/service/auth.service";
+import { useEffect } from "react";
+import { Loader } from "@/components/ui/loader";
+import { useStatusUser } from "@/querys/use-status-user";
 
 export const Route = createFileRoute("/(protected)/_dashboard")({
   component: DashboardLayout,
 });
 
 function DashboardLayout() {
-  const { getToken, isLoaded, isSignedIn } = useAuth();
-  const [isNewUser, setIsNewUser] = useState(false);
+  const { isLoaded, isSignedIn } = useAuth();
+  const { data: session, isLoading: isSessionLoading } = useStatusUser(); // TanStack Query
   const navigate = useNavigate();
 
-  if (isLoaded && !isSignedIn) {
-    navigate({ to: "/login", replace: true });
-  }
+  // 0.- Mostrar loading mientras se carga Clerk o los datos del backend
+  const isLoading = !isLoaded || isSessionLoading;
 
+  // 1.- Redirige a login si no ha iniciado sesión
   useEffect(() => {
-    if (isSignedIn) {
-      const setupSession = async () => {
-        const token = await getToken();
-        if (token) {
-          const session = await establishSession(token);
-          setIsNewUser(session.answers_count === 0);
-        }
-      };
-      setupSession();
+    if (isLoaded && !isSignedIn) {
+      navigate({ to: "/login", replace: true });
     }
-  }, [isSignedIn, getToken]);
-  if (isSignedIn && isNewUser) {
-    navigate({ to: "/onboarding" });
-  }
-  return (
-    <>
-      {isLoaded && !isSignedIn && <div>Cargando</div>}
+  }, [isLoaded, isSignedIn, navigate]);
 
-      {isSignedIn && (
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset>
-            {/* <header className='sticky top-0 bg-sidebar flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12'>
-              <div className='flex items-center gap-2 px-4'>
-                <SidebarTrigger className='-ml-1' />
-                <Separator orientation='vertical' className='mr-2 h-4' />
-                <span>Cual será mi futuro?</span>
-              </div>
-            </header> */}
-            <div className='flex flex-1 flex-col gap-4 p-4 pt-0'>
-              <Outlet />
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
-      )}
-    </>
+  // 2.- Redirige si ya inició sesión y no tiene respuestas
+  useEffect(() => {
+    if (isSignedIn && session?.answers_count === 0) {
+      navigate({ to: "/onboarding", replace: true });
+    }
+  }, [isSignedIn, session, navigate]);
+
+  // 3.- Mostrar loader mientras carga auth o session
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  // 4.- Si está firmado y tiene respuestas, renderiza layout
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <div className='flex flex-1 flex-col gap-4 p-4 pt-0'>
+          <Outlet />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

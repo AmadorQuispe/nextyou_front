@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import { ChatBox } from "./chat-box";
 import { ChatInput } from "./chat-input";
 import { useStreamingChat } from "@/hooks/use-streaming-chat";
-import { getChatSessionById } from "@/service/chat_session.service";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { useChatSession } from "@/querys/use-chat-session";
 
 interface ChatPanelProps {
   sessionId: string;
@@ -24,10 +24,8 @@ export function ChatPanel({ sessionId }: ChatPanelProps) {
   const [messages, setMessages] = useState<any[]>([]);
   const [hasRedirected, setHasRedirected] = useState(false);
 
-  const { data: chatSession } = useQuery({
-    queryKey: ["chat_sessions", sessionId],
-    queryFn: () => getChatSessionById(sessionId),
-    enabled: sessionId !== "new",
+  const { data: chatSession } = useChatSession({
+    id: sessionId === "new" ? undefined : sessionId,
   });
 
   useEffect(() => {

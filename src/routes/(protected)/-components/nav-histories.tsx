@@ -15,17 +15,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getChatSessions } from "@/service/chat_session.service";
 import { Link, useLocation } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useChatSessions } from "@/querys/use-chat-sessions";
 
 export function NavHistories() {
   const { isMobile } = useSidebar();
   const { pathname } = useLocation();
-  const { data: chatSessions } = useQuery({
-    queryKey: ["chat_sessions"],
-    queryFn: () => getChatSessions(),
-  });
+  const { data: chatSessions } = useChatSessions();
 
   return (
     <SidebarGroup className='group-data-[collapsible=icon]:hidden'>

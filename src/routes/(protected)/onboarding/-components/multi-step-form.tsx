@@ -8,9 +8,6 @@ import { StepNavigation } from "./step-navigation";
 import { Summary } from "./summary";
 import { QuestionnaireProgress } from "./questionnaire-progress";
 import { createFormSchema } from "../-schemas/form-schema";
-import { SignOutButton } from "@clerk/clerk-react";
-import { Button } from "@/components/ui/button";
-import { ExitIcon } from "@radix-ui/react-icons";
 
 interface MultiStepFormProps {
   questionnaires: Questionnaire[];
@@ -73,19 +70,7 @@ export function MultiStepForm({
   };
 
   return (
-    <main className='max-w-2xl mx-auto px-6 bg-card rounded-md'>
-      <header className='sticky top-0 bg-sidebar h-16'>
-        <nav className='flex justify-end items-center px-4 h-full'>
-          <SignOutButton>
-            <Button
-              variant='ghost'
-              className='text-primary font-semibold text-md'>
-              Abandonar
-              <ExitIcon className='w-4 h-4' />
-            </Button>
-          </SignOutButton>
-        </nav>
-      </header>
+    <>
       <FormProvider {...methods}>
         <form
           onSubmit={handleSubmit}
@@ -119,6 +104,6 @@ export function MultiStepForm({
           )}
         </form>
       </FormProvider>
-    </main>
+    </>
   );
 }

@@ -2,36 +2,24 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import {
-  createJournal,
-  deleteJournal,
-  getMyJournals,
-  updateJournal,
-} from "@/service/journal.service";
 import type { Journal } from "@/types/journal";
 import { JournalEditor } from "./-components/journal-editor";
 import { JournalEntry } from "./-components/journal-entry";
 import { toast } from "sonner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useJournals } from "@/querys/use-journals";
+import { useCreateJournal } from "@/mutations/use-create-journal";
+import { useUpdateJournal } from "@/mutations/use-update-journal";
+import { useDeleteJournal } from "@/mutations/use-delete-journal";
 
 export const Route = createFileRoute("/(protected)/_dashboard/journal/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { data, refetch, isLoading } = useQuery<Journal[]>({
-    queryKey: ["journal"],
-    queryFn: () => getMyJournals(),
-  });
-  const { mutate: createJournalSubmit } = useMutation({
-    mutationFn: createJournal,
-  });
-  const { mutate: updateJournalSubmit } = useMutation({
-    mutationFn: updateJournal,
-  });
-  const { mutate: deleteJournalSubmit } = useMutation({
-    mutationFn: deleteJournal,
-  });
+  const { data, refetch, isLoading } = useJournals();
+  const { mutate: createJournalSubmit } = useCreateJournal();
+  const { mutate: updateJournalSubmit } = useUpdateJournal();
+  const { mutate: deleteJournalSubmit } = useDeleteJournal();
 
   const [newEntryMode, setNewEntryMode] = useState(false);
   const [newContent, setNewContent] = useState("");
