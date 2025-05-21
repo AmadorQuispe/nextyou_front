@@ -125,7 +125,7 @@ function RouteComponent() {
           <Plus className='w-5 h-5 text-muted-foreground' />
         </div>
       )}
-      {sortedEntries.map((entry) =>
+      {sortedEntries?.map((entry) =>
         editingId === entry.id ? (
           <JournalEditor
             key={`edit-${entry.id}`}

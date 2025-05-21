@@ -8,7 +8,7 @@ export function useJournals() {
   const { getToken } = useAuth();
 
   return useQuery<Journal[]>({
-    queryKey: ["questionnaires"],
+    queryKey: ["journals"],
     queryFn: async () => {
       const token = await getToken();
       const response = await api.get<Journal[]>("/journals", {
